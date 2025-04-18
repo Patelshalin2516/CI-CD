@@ -24,6 +24,19 @@ def get_avatar(age):
     else:
         return "🧓"
 
+# Function to change background color based on age
+def get_background_color(age):
+    if age < 13:
+        return "#FFE0B2"  # Light Yellow for kids
+    elif age < 20:
+        return "#C8E6C9"  # Light Green for teens
+    elif age < 40:
+        return "#BBDEFB"  # Light Blue for young adults
+    elif age < 60:
+        return "#FFF59D"  # Light Yellow for adults
+    else:
+        return "#D1C4E9"  # Light Purple for seniors
+
 # Title and description
 st.title("👋 Welcome to My Streamlit App")
 st.write("This is a fun and interactive Streamlit app that greets you personally!")
@@ -37,7 +50,27 @@ with st.form("user_form"):
 if submitted:
     greeting = get_greeting()
     avatar = get_avatar(age)
+    bg_color = get_background_color(age)
+
+    # Change background color dynamically
+    st.markdown(f"<style>body{{background-color: {bg_color};}}</style>", unsafe_allow_html=True)
+
+    # Display greeting
     st.success(f"{greeting}, {name or 'stranger'}! {avatar} You are {age} years young! 🎉")
+
+    # Age-based recommendation
+    if age < 18:
+        st.write("👨‍🎓 Keep up the studies! 📚")
+    elif age < 40:
+        st.write("💼 Focus on building your career and skills!")
+    elif age < 60:
+        st.write("🌱 Enjoy the journey and growth!")
+    else:
+        st.write("🌟 Enjoy the golden years with peace and joy!")
+
+# Reset button to clear input
+if st.button("🔄 Reset"):
+    st.experimental_rerun()
 
 # Footer
 st.markdown("---")
