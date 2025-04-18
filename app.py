@@ -1,19 +1,26 @@
 import streamlit as st
 
 # Title and description
-st.title("Welcome to My Streamlit App")
-st.write("This is a basic Streamlit page example.")
+st.title("👋 Welcome to My Streamlit App")
+st.write("This is a simple interactive Streamlit example.")
 
 # Input field
-name = st.text_input("Enter your name:")
+name = st.text_input("What's your name?", value="")
 
 # Slider
-age = st.slider("Select your age:", 0, 100, 25)
+age = st.slider("How old are you?", 0, 100, 25)
 
-# Button
-if st.button("Greet Me"):
-    st.success(f"Hello {name}, you are {age} years old!")
+# Buttons
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    if st.button("✨ Greet Me"):
+        st.success(f"Hello, **{name or 'stranger'}**! You are {age} years young! 🎉")
+
+with col2:
+    if st.button("🔄 Reset"):
+        st.experimental_rerun()
 
 # Footer
 st.markdown("---")
-st.caption("Built with using Streamlit")
+st.caption("🚀 Built with Streamlit")
