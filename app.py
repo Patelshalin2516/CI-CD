@@ -16,7 +16,7 @@ def get_avatar(age):
     if age < 13:
         return "🧒"
     elif age < 20:
-        return "🧑‍🎓"
+        return "🧑‍🎓done"
     elif age < 40:
         return "🧑‍💻"
     elif age < 60:
