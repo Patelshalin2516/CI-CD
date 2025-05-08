@@ -3,10 +3,11 @@ from datetime import datetime
 from geoip2.database import Reader
 import requests
 
-# --- Block Canada (CA) users based on IP ---
+# --- Block certain countries based on IP ---
+BLOCKED_COUNTRIES = {"CA", "IN", "JP"}  # Canada, India, Japan
+
 def get_ip():
     try:
-        # Get the user's public IP
         return requests.get("https://api.ipify.org").text
     except:
         return None
@@ -15,17 +16,16 @@ def is_blocked_country(ip):
     try:
         reader = Reader("GeoLite2-Country.mmdb")
         response = reader.country(ip)
-        return response.country.iso_code == 'CA'
+        return response.country.iso_code in BLOCKED_COUNTRIES
     except:
         return False
 
 user_ip = get_ip()
 if user_ip and is_blocked_country(user_ip):
-    st.error("🚫 Access from Canada is not allowed.")
+    st.error("🚫 Access from your country is not allowed.")
     st.stop()
 
-# --- Continue with your Streamlit app ---
-# Function to get greeting based on time
+# --- Main Streamlit App ---
 def get_greeting():
     hour = datetime.now().hour
     if hour < 12:
@@ -35,7 +35,6 @@ def get_greeting():
     else:
         return "🌙 Good Evening"
 
-# Function to return emoji based on age
 def get_avatar(age):
     if age < 13:
         return "🧒"
@@ -48,24 +47,21 @@ def get_avatar(age):
     else:
         return "🧓"
 
-# Function to change background color based on age
 def get_background_color(age):
     if age < 13:
-        return "#FFE0B2"  # Light Yellow for kids
+        return "#FFE0B2"
     elif age < 20:
-        return "#C8E6C9"  # Light Green for teens
+        return "#C8E6C9"
     elif age < 40:
-        return "#BBDEFB"  # Light Blue for young adults
+        return "#BBDEFB"
     elif age < 60:
-        return "#FFF59D"  # Light Yellow for adults
+        return "#FFF59D"
     else:
-        return "#D1C4E9"  # Light Purple for seniors
+        return "#D1C4E9"
 
-# Title and description
 st.title("👋 Welcome to My Streamlit App")
 st.write("This is a fun and interactive Streamlit app that greets you personally!")
 
-# Input section
 with st.form("user_form"):
     name = st.text_input("What's your name?", value="")
     age = st.slider("How old are you?", 0, 100, 25)
