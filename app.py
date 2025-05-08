@@ -4,26 +4,28 @@ from geoip2.database import Reader
 import requests
 
 # --- Block certain countries based on IP ---
-BLOCKED_COUNTRIES = {"CA", "IN", "JP"}  # Canada, India, Japan
 
-def get_ip():
-    try:
-        return requests.get("https://api.ipify.org").text
-    except:
-        return None
+def get_real_ip():
+    import streamlit.web.server.websocket_headers as wh
+    headers = wh._get_websocket_headers()
+    ip = headers.get("X-Forwarded-For", "")
+    return ip.split(",")[0] if ip else None
+
 
 def is_blocked_country(ip):
     try:
         reader = Reader("GeoLite2-Country.mmdb")
         response = reader.country(ip)
-        return response.country.iso_code in BLOCKED_COUNTRIES
+        blocked_countries = {'CA', 'IN', 'JP'}  # Canada, India, Japan
+        return response.country.iso_code in blocked_countries
     except:
         return False
 
-user_ip = get_ip()
+user_ip = get_real_ip()
 if user_ip and is_blocked_country(user_ip):
     st.error("🚫 Access from your country is not allowed.")
     st.stop()
+
 
 # --- Main Streamlit App ---
 def get_greeting():
