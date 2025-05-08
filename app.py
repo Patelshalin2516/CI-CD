@@ -1,6 +1,30 @@
 import streamlit as st
 from datetime import datetime
+from geoip2.database import Reader
+import requests
 
+# --- Block Canada (CA) users based on IP ---
+def get_ip():
+    try:
+        # Get the user's public IP
+        return requests.get("https://api.ipify.org").text
+    except:
+        return None
+
+def is_blocked_country(ip):
+    try:
+        reader = Reader("GeoLite2-Country.mmdb")
+        response = reader.country(ip)
+        return response.country.iso_code == 'CA'
+    except:
+        return False
+
+user_ip = get_ip()
+if user_ip and is_blocked_country(user_ip):
+    st.error("🚫 Access from Canada is not allowed.")
+    st.stop()
+
+# --- Continue with your Streamlit app ---
 # Function to get greeting based on time
 def get_greeting():
     hour = datetime.now().hour
@@ -16,7 +40,7 @@ def get_avatar(age):
     if age < 13:
         return "🧒"
     elif age < 20:
-        return "🧑‍🎓done"
+        return "🧑‍🎓"
     elif age < 40:
         return "🧑‍💻"
     elif age < 60:
@@ -52,13 +76,16 @@ if submitted:
     avatar = get_avatar(age)
     bg_color = get_background_color(age)
 
-    # Change background color dynamically
-    st.markdown(f"<style>body{{background-color: {bg_color};}}</style>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <style>
+        .stApp {{
+            background-color: {bg_color};
+        }}
+        </style>
+        """, unsafe_allow_html=True)
 
-    # Display greeting
     st.success(f"{greeting}, {name or 'stranger'}! {avatar} You are {age} years young! 🎉")
 
-    # Age-based recommendation
     if age < 18:
         st.write("👨‍🎓 Keep up the studies! 📚")
     elif age < 40:
@@ -68,10 +95,8 @@ if submitted:
     else:
         st.write("🌟 Enjoy the golden years with peace and joy!")
 
-# Reset button to clear input
 if st.button("🔄 Reset"):
     st.experimental_rerun()
 
-# Footer
 st.markdown("---")
 st.caption("🚀 Built with ❤️ using Streamlit")
