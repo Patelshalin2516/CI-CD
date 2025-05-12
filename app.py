@@ -16,7 +16,7 @@ def is_blocked_country(ip):
     try:
         reader = Reader("GeoLite2-Country.mmdb")
         response = reader.country(ip)
-        blocked_countries = {'CA', 'IN', 'JP'}  # Canada, India, Japan
+        blocked_countries = {'CA','JP'}  # Canada, India, Japan
         return response.country.iso_code in blocked_countries
     except:
         return False
