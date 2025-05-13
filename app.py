@@ -1,33 +1,38 @@
 import streamlit as st
 from datetime import datetime
 from geoip2.database import Reader
-import requests
+import streamlit.web.server.websocket_headers as wh
 
-# --- Block certain countries based on IP ---
+# --- Config ---
+BLOCKED_COUNTRIES = {'CA', 'JP'}  # Canada, Japan
 
+# --- Load GeoIP Reader only once ---
+@st.cache_resource
+def load_geoip_reader():
+    return Reader("GeoLite2-Country.mmdb")
+
+geoip_reader = load_geoip_reader()
+
+# --- IP Utilities ---
 def get_real_ip():
-    import streamlit.web.server.websocket_headers as wh
     headers = wh._get_websocket_headers()
     ip = headers.get("X-Forwarded-For", "")
-    return ip.split(",")[0] if ip else None
-
+    return ip.split(",")[0].strip() if ip else None
 
 def is_blocked_country(ip):
     try:
-        reader = Reader("GeoLite2-Country.mmdb")
-        response = reader.country(ip)
-        blocked_countries = {'CA','JP'}  # Canada, India, Japan
-        return response.country.iso_code in blocked_countries
-    except:
+        response = geoip_reader.country(ip)
+        return response.country.iso_code in BLOCKED_COUNTRIES
+    except Exception:
         return False
 
+# --- GeoIP Block ---
 user_ip = get_real_ip()
 if user_ip and is_blocked_country(user_ip):
     st.error("🚫 Access from your country is not allowed.")
     st.stop()
 
-
-# --- Main Streamlit App ---
+# --- Greeting Functions ---
 def get_greeting():
     hour = datetime.now().hour
     if hour < 12:
@@ -61,6 +66,7 @@ def get_background_color(age):
     else:
         return "#D1C4E9"
 
+# --- App UI ---
 st.title("👋 Welcome to My Streamlit App")
 st.write("This is a fun and interactive Streamlit app that greets you personally!")
 
